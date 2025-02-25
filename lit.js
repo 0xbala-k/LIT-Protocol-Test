@@ -7,16 +7,18 @@ import {
   createSiweMessageWithRecaps,
   generateAuthSig,
 } from "@lit-protocol/auth-helpers";
+import dotenv from 'dotenv';
 
-const account1= "cae12297a07b1d5a55515ec06cb378878cb99bdd0e43c505ffe8b9748103134d"
+dotenv.config();
+
 const bob = new ethers.Wallet(
-    account1, 
+    process.env.BOB_KEY, 
     new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
 );
 
 const account2="e889d17573e4454c56ea7e82d62f6bb1e3409d4fdc55c50c32d3a809fd2543d6"
 const alice = new ethers.Wallet(
-    account2
+  process.env.ALICE_KEY
     // new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
 )
 
@@ -29,7 +31,7 @@ const accessControlConditions = [
     parameters: [":userAddress", "latest"],
     returnValueTest: {
       comparator: ">=",
-      value: "1000000000000", // 0.000001 ETH
+      value: "100000000000000000", // 0.1 ETH
     },
   },
 ];
@@ -180,7 +182,7 @@ console.log("Delegation Auth Sig: ", delegationAuthSig)
 
 
 // decrypt message
-const decryptedString = await myLit.decrypt(encryptionData.ciphertext,encryptionData.dataToEncryptHash,delegationAuthSig, alice);
+const decryptedString = await myLit.decrypt(encryptionData.ciphertext,encryptionData.dataToEncryptHash,delegationAuthSig, bob);
 
 console.log("Decrypted String: ", decryptedString)
 
