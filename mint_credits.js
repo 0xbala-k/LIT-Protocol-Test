@@ -1,10 +1,12 @@
 import { LIT_NETWORK, LIT_RPC } from "@lit-protocol/constants";
 import { LitContracts } from "@lit-protocol/contracts-sdk";
 import { ethers } from "ethers";
+import dotenv from 'dotenv';
 
-const account1= "cae12297a07b1d5a55515ec06cb378878cb99bdd0e43c505ffe8b9748103134d"
+dotenv.config();
+
 const walletWithCapacityCredit = new ethers.Wallet(
-    account1, 
+    process.env.BOB_KEY, 
     new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
 );
 

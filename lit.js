@@ -16,7 +16,6 @@ const bob = new ethers.Wallet(
     new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
 );
 
-const account2="e889d17573e4454c56ea7e82d62f6bb1e3409d4fdc55c50c32d3a809fd2543d6"
 const alice = new ethers.Wallet(
   process.env.ALICE_KEY
     // new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
