@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lit Delegate Capacity Demo</title>
+  </head>
+  <body>
+    <h1>Lit Delegate Capacity Demo</h1>
+    <!-- Button to connect to the wallet -->
+    <button id="connectWallet">Connect Wallet</button>
+    <!-- Button to call delegateCapacity -->
+    <button id="delegateCapacity">Delegate Capacity</button>
+
+    <script type="module">
+      // Import your Lit class from the local module file
+      import { ethers } from "ethers";
+      import { Lit } from "./lit.js";
+
+      // A variable to store the connected wallet's details
+      let signer;
+
+      // Function to connect to the user's MetaMask wallet
+      console.log("Here 100")
+
+      async function connectWallet() {
+        console.log("Here 1")
+
+        if (window.ethereum) {
+            console.log("Here 2")
+          try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+            await provider.send("eth_requestAccounts", []);
+
+            const signer = provider.getSigner()
+            console.log("Signer: ",signer);
+            console.log("Connected wallet:", signer.address);
+            document.getElementById("connectWallet").innerText =
+              "Wallet Connected: " + signer.address;
+          } catch (error) {
+            console.error("User rejected the connection:", error);
+          }
+        } else {
+          alert("Please install MetaMask to use this feature!");
+        }
+      }
+
+      document
+        .getElementById("connectWallet")
+        .addEventListener("click", connectWallet);
+
+      // Function to call delegateCapacity on button click
+      async function handleDelegateCapacity() {
+        console.log("Herer");
+        if (!signer) {
+          alert("Please connect your wallet first.");
+          return;
+        }
+
+        const chain = "ethereum";
+        const myLit = new Lit(chain);
+
+        try {
+          // Connect to Lit network
+          await myLit.connect();
+
+          // For this demo, we use a dummy capacity token id.
+          const capacityTokenIdStr = 835;
+
+          // Call delegateCapacity with the wallet and token id
+          const capacityDelegationAuthSig = await myLit.delegateCapacity(
+            capacityTokenIdStr,
+            signer
+          );
+
+          console.log("Capacity Delegation Auth Sig:", capacityDelegationAuthSig);
+          alert("Delegate Capacity called. Check the console for the auth signature.");
+        } catch (error) {
+          console.error("Error calling delegateCapacity:", error);
+          alert("An error occurred. Check console for details.");
+        } finally {
+          // Disconnect from Lit network when done
+          await myLit.disconnect();
+        }
+      }
+
+      document
+        .getElementById("delegateCapacity")
+        .addEventListener("click", handleDelegateCapacity);
+    </script>
+  </body>
+</html>
