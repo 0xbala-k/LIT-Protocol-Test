@@ -30,7 +30,7 @@ export class Lit {
    }
 
   async delegateCapacity(capacityTokenIdStr, userAddress){
-    const { capacityDelegationAuthSig } =
+    const  capacityDelegationAuthSig  =
     await this.litNodeClient.createCapacityDelegationAuthSig({
         uses: '1',
         dAppOwnerWallet: dappOwner,
