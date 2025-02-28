@@ -1,20 +1,13 @@
 ## Testing LIT protocol for encrypting and decripting data based on access control condotions
 
 ### Setup
-Setup .env with 2 private keys one that satisfies the conditions and one that doesn't
+Setup .env with a private keys one that is used to upload data to eth storage and is used to mint compute credits for lit network
 ```bash
-ALICE_KEY="jdfblsdjnfldnf......."
-BOB_KEY="njkdwnc78342fgh20inef......"
+PRIVATE_KEY="jdfblsdjnfldnf......."
 ```
 
-### Run Test
-```bash
-node mint_credits.js
-```
-Take the ID and replace id in lit.js line 179
+### Run Server
 
-Then run
 ```bash
-node lit.js
+node index.js
 ```
-try with both bob and alice accounts in line 184.
