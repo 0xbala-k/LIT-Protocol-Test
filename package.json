@@ -18,7 +18,8 @@
     "@lit-protocol/lit-node-client": "^7.0.6",
     "@lit-protocol/lit-node-client-nodejs": "^7.0.6",
     "dotenv": "^16.4.7",
-    "ethers": "^5.7.2"
+    "ethers": "^5.7.2",
+    "ethstorage-sdk": "^3.0.0"
   },
   "devDependencies": {
     "live-server": "^1.2.2"
