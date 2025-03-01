@@ -5,7 +5,6 @@ import { requestCapacity } from './delegateCompute.js';
 import cors from 'cors';
 import axios from 'axios';
 import pkg from './ethstorage_helper.cjs';
-import { ethers, utils } from "ethers";
 
 const { createFlatDirectory, uploadData } = pkg;
 
@@ -13,8 +12,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// contractAddress = await createFlatDirectory();
-let contractAddress = "0xC240fe0B0bEcB8a5f73a87a9CA253c8fD25A9250";
+let storageContractAddress = "";
 
 // Enable CORS for all origins
 app.use(cors({
@@ -55,7 +53,7 @@ app.post("/upload-data", async (req, res) => {
     try {
         if (!key || !content) throw new Error("Missing key or content");
         console.log(key + "  " + content);
-        await uploadData(key, content, contractAddress);
+        await uploadData(key, content, storageContractAddress);
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error uploading data:', error);
@@ -65,10 +63,10 @@ app.post("/upload-data", async (req, res) => {
 
 app.get("/get-data/:key", async (req, res) => {
     const key = req.params.key;
-    if (!contractAddress) {
+    if (!storageContractAddress) {
         return res.status(503).json({ success: false, error: "EthStorage contract not yet initialized" });
     }
-    const url = `https://${contractAddress}.3337.w3link.io/${key}`;
+    const url = `https://${storageContractAddress}.3337.w3link.io/${key}`;
     console.log("Fetching from URL:", url);
     try {
         const response = await axios.get(url);
@@ -82,8 +80,13 @@ app.get("/get-data/:key", async (req, res) => {
 // Start the server after initializing contract
 async function startServer() {
     try {
-        
-        console.log("EthStorage contract address initialized:", contractAddress);
+        if(process.env.STORAGE_CONTRACT_ADDRESS) {
+            storageContractAddress = process.env.STORAGE_CONTRACT_ADDRESS; 
+        }
+        else { 
+            storageContractAddress = await createFlatDirectory();
+        }
+        console.log("EthStorage contract address:", storageContractAddress);
         app.listen(port, () => {
             console.log(`Server is running on port ${port}`);
         });
