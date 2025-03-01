@@ -15,7 +15,7 @@ const dappOwner = new ethers.Wallet(
     new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
 );
 
-async function connectWithRetry(litNodeClient, maxRetries = 3) {
+async function connectWithRetry(litNodeClient, maxRetries = 1) {
     for (let i = 0; i < maxRetries; i++) {
         try {
             await litNodeClient.connect();
