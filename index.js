@@ -71,7 +71,7 @@ app.get("/get-data/:key", async (req, res) => {
     console.log("Fetching from URL:", url);
     try {
         const response = await axios.get(url);
-        res.status(200).json({ data: response.data });
+        res.status(200).json(response.data);
     } catch (error) {
         console.error('Error fetching data:', error);
         res.status(500).json({ success: false, error: `Failed to fetch data: ${error.message}`, url });
