@@ -5,30 +5,45 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export let capacityTokenId = "";
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+if (!PRIVATE_KEY) {
+    throw new Error("PRIVATE_KEY not set in .env");
+}
 
 const walletWithCapacityCredit = new ethers.Wallet(
-    process.env.PRIVATE_KEY, 
+    PRIVATE_KEY,
     new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
 );
 
-export async function mintCapacityCredits(){
-  let contractClient = new LitContracts({
-    signer: walletWithCapacityCredit,
-    network: LIT_NETWORK.DatilDev,
-  });
-  
-  await contractClient.connect();
+async function connectWithRetry(contractClient, maxRetries = 3) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            await contractClient.connect();
+            return;
+        } catch (error) {
+            if (i === maxRetries - 1) throw new Error(`Failed to connect after ${maxRetries} attempts: ${error.message}`);
+            console.warn(`Connect attempt ${i + 1} failed, retrying...`, error);
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
+    }
+}
 
-  // this identifier will be used in delegation requests. 
-  const { capacityTokenIdStr } = await contractClient.mintCapacityCreditsNFT({
-      requestsPerKilosecond: 80,
-      // requestsPerDay: 14400,
-      // requestsPerSecond: 10,
-      daysUntilUTCMidnightExpiration: 2,
-    });
+export async function mintCapacityCredits(requestsPerKilosecond = 80, daysUntilUTCMidnightExpiration = 2) {
+    try {
+        let contractClient = new LitContracts({
+            signer: walletWithCapacityCredit,
+            network: LIT_NETWORK.DatilDev,
+        });
+        
+        await connectWithRetry(contractClient);
 
-    capacityTokenId = capacityTokenIdStr;
+        const { capacityTokenIdStr } = await contractClient.mintCapacityCreditsNFT({
+            requestsPerKilosecond,
+            daysUntilUTCMidnightExpiration,
+        });
 
-    return capacityTokenIdStr;
+        return capacityTokenIdStr;
+    } catch (error) {
+        throw new Error(`Failed to mint capacity credits: ${error.message}`);
+    }
 }
