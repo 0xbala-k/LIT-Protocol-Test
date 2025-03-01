@@ -15,7 +15,7 @@ const walletWithCapacityCredit = new ethers.Wallet(
     new ethers.providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
 );
 
-async function connectWithRetry(contractClient, maxRetries = 3) {
+async function connectWithRetry(contractClient, maxRetries = 1) {
     for (let i = 0; i < maxRetries; i++) {
         try {
             await contractClient.connect();
