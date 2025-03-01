@@ -49,35 +49,35 @@ async function uploadData(key, data, contractAddress) {
     await flatDirectory.upload(request);
 }
 
-// async function downloadData(key, contractAddress) {
-//     const flatDirectory = await FlatDirectory.create({
-//         rpc: rpc,
-//         ethStorageRpc: ethStorageRpc,
-//         privateKey: privateKey,
-//         address: contractAddress,
-//     });
+async function downloadData(key, contractAddress) {
+    const flatDirectory = await FlatDirectory.create({
+        rpc: rpc,
+        ethStorageRpc: ethStorageRpc,
+        privateKey: privateKey,
+        address: contractAddress,
+    });
 
-//     const callback = {
-//         onProgress: function (progress, count, chunk) {
-//             console.log(`Download Progress: ${progress}% complete. Count: ${count}`);
-//         },
-//         onFail: function (err) {
-//             console.error('Download failed:', err);
-//         },
-//         onFinish: function (data) {
-//             console.log(`Download complete! Data: ${data}`);
-//         }
-//     };
+    const callback = {
+        onProgress: function (progress, count, chunk) {
+            console.log(`Download Progress: ${progress}% complete. Count: ${count}`);
+        },
+        onFail: function (err) {
+            console.error('Download failed:', err);
+        },
+        onFinish: function (data) {
+            console.log(`Download complete! Data: ${data}`);
+        }
+    };
 
-//     const result = await flatDirectory.download(key, callback);
-//     console.log("Result: ", result)
-//     return result;
-// }
+    const result = await flatDirectory.download(key, callback);
+    console.log("Result: ", result)
+    return result;
+}
 
 module.exports = { 
     createFlatDirectory,
     uploadData,
-    // downloadData
+    downloadData
  };
 
 // // Wrap the code in an async function

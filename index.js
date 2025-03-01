@@ -6,7 +6,7 @@ import cors from 'cors';
 import axios from 'axios';
 import pkg from './ethstorage_helper.cjs';
 
-const { createFlatDirectory, uploadData } = pkg;
+const { createFlatDirectory, uploadData, downloadData } = pkg;
 
 dotenv.config();
 const app = express();
@@ -74,6 +74,20 @@ app.get("/get-data/:key", async (req, res) => {
     } catch (error) {
         console.error('Error fetching data:', error);
         res.status(500).json({ success: false, error: `Failed to fetch data: ${error.message}`, url });
+    }
+});
+
+app.get("/download-data/:key", async (req, res) => {
+    const key = req.params.key;
+    if (!storageContractAddress) {
+        return res.status(503).json({ success: false, error: "EthStorage contract not yet initialized" });
+    }
+    try {
+        const content = await downloadData(key, storageContractAddress);
+        res.status(200).json({ content });
+    } catch (error) {
+        console.error('Error uploading data:', error);
+        res.status(500).json({ success: false, error: 'Internal Server Error: ' + error.message });
     }
 });
 
