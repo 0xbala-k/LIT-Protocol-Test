@@ -56,7 +56,6 @@ app.post("/upload-data", async (req, res) => {
         console.log(key + "  " + content);
         const hexKey = utils.hexlify(utils.toUtf8Bytes(key));
         const hexContent = utils.hexlify(utils.toUtf8Bytes(content));
-        console.log(hexKey + "  " + hexContent);
         await uploadData(hexKey, hexContent, contractAddress);
         res.status(200).json({ success: true });
     } catch (error) {
