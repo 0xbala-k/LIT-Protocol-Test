@@ -13,7 +13,8 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-let contractAddress = "";
+// contractAddress = await createFlatDirectory();
+let contractAddress = "0xC240fe0B0bEcB8a5f73a87a9CA253c8fD25A9250";
 
 // Enable CORS for all origins
 app.use(cors({
@@ -81,7 +82,7 @@ app.get("/get-data/:key", async (req, res) => {
 // Start the server after initializing contract
 async function startServer() {
     try {
-        contractAddress = await createFlatDirectory();
+        
         console.log("EthStorage contract address initialized:", contractAddress);
         app.listen(port, () => {
             console.log(`Server is running on port ${port}`);
