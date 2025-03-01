@@ -38,13 +38,14 @@ app.get('/mint-capacity-credits', async (req, res) => {
 });
 
 app.post('/delegate-capacity', async (req, res) => {
-    const { userAddress } = req.body;
+    const { userAddress, capacityTokenIdStr, uses = '1' } = req.body;
     try {
-        const delegationAuthSig = await requestCapacity(userAddress);
+        if (!userAddress || !capacityTokenIdStr) throw new Error("Missing userAddress or capacityTokenIdStr");
+        const delegationAuthSig = await requestCapacity(userAddress, capacityTokenIdStr, uses);
         res.status(200).json({ delegationAuthSig });
     } catch (error) {
         console.error('Error delegating capacity credits:', error);
-        res.status(500).json({ success: false, error: 'Internal Server Error: ' + error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
