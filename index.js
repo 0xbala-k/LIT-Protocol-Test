@@ -28,11 +28,12 @@ app.use(express.json());
 // Define API routes
 app.get('/mint-capacity-credits', async (req, res) => {
     try {
-        const capacityTokenIdStr = await mintCapacityCredits();
+        const { requestsPerKilosecond = 80, days = 2 } = req.query;
+        const capacityTokenIdStr = await mintCapacityCredits(Number(requestsPerKilosecond), Number(days));
         res.status(200).json({ capacityTokenIdStr });
     } catch (error) {
         console.error('Error minting capacity credits:', error);
-        res.status(500).json({ success: false, error: 'Internal Server Error: ' + error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
