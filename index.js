@@ -54,9 +54,7 @@ app.post("/upload-data", async (req, res) => {
     try {
         if (!key || !content) throw new Error("Missing key or content");
         console.log(key + "  " + content);
-        const hexKey = key;
-        const hexContent = utils.hexlify(utils.toUtf8Bytes(content));
-        await uploadData(hexKey, hexContent, contractAddress);
+        await uploadData(key, content, contractAddress);
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error uploading data:', error);
