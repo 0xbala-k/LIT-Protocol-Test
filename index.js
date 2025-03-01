@@ -5,7 +5,7 @@ import { requestCapacity } from './delegateCompute.js';
 import cors from 'cors';
 import axios from 'axios';
 import pkg from './ethstorage_helper.cjs';
-import { ethers } from "ethers";
+import { ethers, utils } from "ethers";
 
 const { createFlatDirectory, uploadData } = pkg;
 
@@ -53,8 +53,8 @@ app.post("/upload-data", async (req, res) => {
     const { key, content } = req.body;
     try {
         if (!key || !content) throw new Error("Missing key or content");
-        const hexKey = ethers.hexlify(ethers.toUtf8Bytes(key));
-        const hexContent = ethers.hexlify(ethers.toUtf8Bytes(content));
+        const hexKey = ethers.hexlify(utils.toUtf8Bytes(key));
+        const hexContent = ethers.hexlify(utils.toUtf8Bytes(content));
         await uploadData(hexKey, hexContent, contractAddress);
         res.status(200).json({ success: true });
     } catch (error) {
