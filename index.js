@@ -5,6 +5,8 @@ import { requestCapacity } from './delegateCompute.js';
 import cors from 'cors';
 import axios from 'axios';
 import pkg from './ethstorage_helper.cjs';
+import { ethers } from "ethers";
+
 const { createFlatDirectory, uploadData } = pkg;
 
 dotenv.config();
@@ -13,66 +15,80 @@ const port = process.env.PORT || 3000;
 
 let contractAddress = "";
 
-// Enable CORS for all routes
-app.use(cors());
+// Enable CORS for all origins
+app.use(cors({
+    origin: "*", // Allow any origin
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+}));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// init ethStorage
- contractAddress = await createFlatDirectory();
-
-// Define a simple API route
+// Define API routes
 app.get('/mint-capacity-credits', async (req, res) => {
-    try{
-        const capacityTokenIdStr =  await mintCapacityCredits();
-        res.json({ capacityTokenIdStr: capacityTokenIdStr });
-    }catch(error){
+    try {
+        const capacityTokenIdStr = await mintCapacityCredits();
+        res.status(200).json({ capacityTokenIdStr });
+    } catch (error) {
         console.error('Error minting capacity credits:', error);
-        res.status(500).json({ error: 'Internal Server Error, '+error });
+        res.status(500).json({ success: false, error: 'Internal Server Error: ' + error.message });
     }
 });
 
 app.post('/delegate-capacity', async (req, res) => {
-    const data = req.body;
-    const userAddress = data["userAddress"];
-    try{
+    const { userAddress } = req.body;
+    try {
         const delegationAuthSig = await requestCapacity(userAddress);
-        res.json({ delegationAuthSig: delegationAuthSig });
-    }catch(error){
+        res.status(200).json({ delegationAuthSig });
+    } catch (error) {
         console.error('Error delegating capacity credits:', error);
-        res.status(500).json({ error: 'Internal Server Error, '+error });
+        res.status(500).json({ success: false, error: 'Internal Server Error: ' + error.message });
     }
 });
 
 app.post("/upload-data", async (req, res) => {
-    const data = req.body;
-    const key = data["key"];
-    const content = data["content"];
-    try{
-        await uploadData(key, content, contractAddress);
-        res.json({ success: true });
-    }catch(error){
+    const { key, content } = req.body;
+    try {
+        if (!key || !content) throw new Error("Missing key or content");
+        const hexKey = ethers.hexlify(ethers.toUtf8Bytes(key));
+        const hexContent = ethers.hexlify(ethers.toUtf8Bytes(content));
+        await uploadData(hexKey, hexContent, contractAddress);
+        res.status(200).json({ success: true });
+    } catch (error) {
         console.error('Error uploading data:', error);
-        res.status(500).json({ error: 'Internal Server Error, '+error });
+        res.status(500).json({ success: false, error: 'Internal Server Error: ' + error.message });
     }
 });
 
 app.get("/get-data/:key", async (req, res) => {
-    console.log("contractAddress: ", contractAddress);
     const key = req.params.key;
-    const url =  `https://${contractAddress}.3337.w3link.io/${key}`;
-    console.log("URL: ", url);
-    try{
+    if (!contractAddress) {
+        return res.status(503).json({ success: false, error: "EthStorage contract not yet initialized" });
+    }
+    const url = `https://${contractAddress}.3337.w3link.io/${key}`;
+    console.log("Fetching from URL:", url);
+    try {
         const response = await axios.get(url);
-        res.json({ data: response.data });
-    } catch(error){
+        res.status(200).json({ data: response.data });
+    } catch (error) {
         console.error('Error fetching data:', error);
-        res.status(500).json({ error: 'Internal Server Error, '+error+" URL: "+url });
+        res.status(500).json({ success: false, error: `Failed to fetch data: ${error.message}`, url });
     }
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+// Start the server after initializing contract
+async function startServer() {
+    try {
+        contractAddress = await createFlatDirectory();
+        console.log("EthStorage contract address initialized:", contractAddress);
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
+        });
+    } catch (error) {
+        console.error("Failed to initialize EthStorage contract and start server:", error);
+        process.exit(1);
+    }
+}
+
+startServer();
